@@ -26,19 +26,18 @@ class S3ControllerTest {
 
     @Test
     void givenAValidBucketNameWhenCreateBucketThenReturnCreated() throws Exception {
+        // Arrange
         var json = """
             {
                 "bucketName": "my-bucket"
             }
             """;
-
         doNothing().when(s3Service).createBucket("my-bucket");
-
         var request = MockMvcRequestBuilders
             .post("/s3/create-bucket")
             .contentType("application/json")
             .content(json);
-
+        // Act and Assert
         mockMvc.perform(request)
             .andExpect(status().isCreated())
             .andExpect(header().string("Location", "/s3/my-bucket"));
@@ -46,20 +45,19 @@ class S3ControllerTest {
 
     @Test
     void givenAInvalidBucketNameWhenCreateBucketThenReturnCreated() throws Exception {
+        // Arrange
         var json = """
             {
                 "bucketName": "invalid-bucket-name"
             }
             """;
-
         doThrow(new CreateBucketException("invalid-bucket-name", new RuntimeException()))
             .when(s3Service).createBucket("invalid-bucket-name");
-
         var request = MockMvcRequestBuilders
             .post("/s3/create-bucket")
             .contentType("application/json")
             .content(json);
-
+        // Act and Assert
         mockMvc.perform(request)
             .andExpect(status().isBadGateway())
             .andExpect(jsonPath("$.message").value("Error creating bucket invalid-bucket-name"));
